@@ -109,6 +109,7 @@ class ConvertThread(QtCore.QThread):
         return outfp
         
     def dumpError(self,cmd):
+        """dumping ffmpeg output"""
         header="\n\n\n===============================================================================================\
         \nsavc failed to convert file with command:\n"+cmd+"\non "+datetime.datetime.now().strftime("%Y-%m-%d at %H:%M:%s\n\n")
         f=codecs.open("error.log",'a','utf-8')
@@ -192,7 +193,9 @@ class ConvertThread(QtCore.QThread):
 
         
 class SCWindow(QtGui.QMainWindow):
+    """Main GUI class"""
     def __init__(self,parent=None):
+        """preparing gui and setting audio/video options"""
         QtGui.QWidget.__init__(self,parent)
         self.ui=Ui_MainWindow()
         self.ui.setupUi(self)
@@ -200,12 +203,8 @@ class SCWindow(QtGui.QMainWindow):
         self.ui.tprog.hide()
         self.ui.progressBar.setFormat("%v/%m")
         
-        
-        
-        
         self.show()
         
-        #self.convertMethods={"mpc":["mp3","ogg"],"wav":["mp3","ogg"],"flac":["mp3","ogg"],"m4a":["mp3","ogg"],"mkv":["avi",],"rmvb":["avi",]}
         self.convertMethods={}
         self.audioFormats=["mp3","ogg","wav","flac","m4a","mpc"]
         for i in self.audioFormats:
@@ -260,6 +259,7 @@ class SCWindow(QtGui.QMainWindow):
         
     
     def selectDir(self):
+        "selecting whole directory, reading content"
         a=QtGui.QFileDialog()
         a.setFileMode(a.Directory)
         res=a.exec_()
@@ -290,6 +290,7 @@ class SCWindow(QtGui.QMainWindow):
                 QtGui.QMessageBox.warning(self,self.tr("Error!"),self.tr("In selected directory there are no supported files"))
     
     def selectFiles(self):
+        """selecting files, setting filters etc"""
         a=QtGui.QFileDialog()
         audiofilters="*."+" *.".join(self.audioFormats)
         videofilters="*."+" *.".join(self.videoFormats)
@@ -313,6 +314,7 @@ class SCWindow(QtGui.QMainWindow):
                 self.ui.comboBox.setCurrentIndex(1)
     
     def fillConvertMethods(self,files):
+        """setting combobox with all available conversion options"""
         self.ui.tprog.hide()
         self.ui.fprog.hide()
         self.ui.comboBox.clear()
@@ -342,6 +344,7 @@ class SCWindow(QtGui.QMainWindow):
             self.ui.comboBox.addItem(i)
             
     def conversionSelected(self):
+        """preparing list of files to convert"""
         self.ui.tprog.hide()
         self.ui.fprog.hide()
         currtext=self.ui.comboBox.currentText()
@@ -365,6 +368,7 @@ class SCWindow(QtGui.QMainWindow):
                     if i in self.files: files+=self.files[i]
             else:                
                 files=self.files[ext]
+            files.sort()
             self.ui.tableWidget.setRowCount(len(files))
             for i in files:
                 self.ui.tableWidget.setItem(c,0,QtGui.QTableWidgetItem(i))
@@ -372,7 +376,7 @@ class SCWindow(QtGui.QMainWindow):
             if len(files)>0:
                 self.ui.progressBar.setMaximum(len(files))
             self.convertFiles=files
-
+        
             self.ui.buttonBox.buttons()[0].setDisabled(False)
         else:
             self.ui.buttonBox.buttons()[0].setDisabled(True)
