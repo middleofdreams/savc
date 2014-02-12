@@ -29,7 +29,6 @@ class ConvertThread(QtCore.QThread):
         self.videoOptions=parent.videoOptions
         self.reg=re.compile("Duration: ([0-9][0-9]):([0-9][0-9]):([0-9][0-9])")
         self.reg2=re.compile("time=([0-9][0-9]):([0-9][0-9]):([0-9][0-9])")
-        self.fullOut=""
         
     def getSecs(self,rd):
         """converts hours,minutes and seconds to seconds"""
@@ -54,6 +53,7 @@ class ConvertThread(QtCore.QThread):
 
         s=""
         conv=False
+        self.fullOut=""
         while not conv:
             out=prc.stderr.read(300)
             s+=out
