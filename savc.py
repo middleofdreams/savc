@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from PyQt4 import QtCore,QtGui
 from sc_ui import Ui_MainWindow
-import os,subprocess,shlex,time,re
+import os,subprocess,shlex,codecs,re,datetime
 from res_rc import *
 
 
@@ -45,8 +45,8 @@ class ConvertThread(QtCore.QThread):
             ab=254
             vb=4000
         else:
-            ab=192
-            vb=1000
+            ab=128
+            vb=500
         return ab,vb
         
     def getDuration(self,prc):
@@ -57,7 +57,7 @@ class ConvertThread(QtCore.QThread):
         while not conv:
             out=prc.stderr.read(300)
             s+=out
-            self.fullOut=out
+            self.fullOut+=out
 
             try:
                 rd=self.reg.search(s).groups()
@@ -85,7 +85,7 @@ class ConvertThread(QtCore.QThread):
                     a=""
                 else:
                     raise Exception
-            except AttributeError:
+            except:
                 if prc.poll() is not None:
                     self.makeSmallProgress.emit(duration,c)
                     if int(prc.returncode==0):
@@ -95,6 +95,7 @@ class ConvertThread(QtCore.QThread):
                     conv=False
                     
     def genNewName(self,outfp,outext):
+        """generating new name if file already exists"""
         try:
             b,sint,_=outfp.rsplit(".",2)
             sint=str(int(sint)+1)
@@ -107,9 +108,18 @@ class ConvertThread(QtCore.QThread):
                 outfp= self.genNewName(outfp,outext)
         return outfp
         
+    def dumpError(self,cmd):
+        header="\n\n\n===============================================================================================\
+        \nsavc failed to convert file with command:\n"+cmd+"\non "+datetime.datetime.now().strftime("%Y-%m-%d at %H:%M:%s\n\n")
+        f=codecs.open("error.log",'a','utf-8')
+        f.write(header)            
+        f.write(self.fullOut)
+        f.close()
+        print self.fullOut
     
     
     def run(self):
+        """main function - starting thread"""
         self.resp=None
         self.convertFiles=self.parent.convertFiles
 
@@ -166,7 +176,8 @@ class ConvertThread(QtCore.QThread):
                         os.remove(sdir+os.sep+i)
                     self.fillTable.emit(c,self.tr("Done!"))
                 else:
-                    print self.fullOut
+                    
+                    self.dumpError(cmd)
                     self.fillTable.emit(c,self.tr("Error!"))
 
                 
@@ -187,7 +198,7 @@ class SCWindow(QtGui.QMainWindow):
         self.ui.setupUi(self)
         self.ui.fprog.hide()
         self.ui.tprog.hide()
-        
+        self.ui.progressBar.setFormat("%v/%m")
         
         
         
@@ -302,6 +313,8 @@ class SCWindow(QtGui.QMainWindow):
                 self.ui.comboBox.setCurrentIndex(1)
     
     def fillConvertMethods(self,files):
+        self.ui.tprog.hide()
+        self.ui.fprog.hide()
         self.ui.comboBox.clear()
         
         convertMethods=[]
@@ -329,7 +342,8 @@ class SCWindow(QtGui.QMainWindow):
             self.ui.comboBox.addItem(i)
             
     def conversionSelected(self):
-        
+        self.ui.tprog.hide()
+        self.ui.fprog.hide()
         currtext=self.ui.comboBox.currentText()
         self.ui.tableWidget.clear()
         
@@ -375,9 +389,9 @@ class SCWindow(QtGui.QMainWindow):
     def makeSmallProgress(self,i,c):
         item=  self.ui.tableWidget.item(c, 0)   
         self.ui.tableWidget.scrollToItem(item)
-        
         self.ui.progressBar_2.setValue(i)
-        
+        self.ui.progressBar_2.setFormat(item.text()+ " - %p%")
+
 
     def makeProgess(self):
         self.ui.progressBar.setValue(self.ui.progressBar.value()+1)
