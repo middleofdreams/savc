@@ -166,7 +166,8 @@ class ConvertThread(QtCore.QThread):
                         cmd="ffmpeg -i '"+sdir+os.sep+i+"' -y -c:v mpeg4 -b:v "+str(vb)+"k -c:a libmp3lame -ab "+str(ab)+"k '"+outfp+"'"
                 
                 self.fillTable.emit(c,self.tr("Converting..."))
-                prc= subprocess.Popen(shlex.split(str(cmd)),stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+                
+                prc= subprocess.Popen(shlex.split(unicode(cmd).encode('utf-8')),stdout=subprocess.PIPE,stderr=subprocess.PIPE)
                 #prc.wait()
                 #time.sleep(1)
                 duration=self.getDuration(prc)
@@ -267,7 +268,7 @@ class SCWindow(QtGui.QMainWindow):
             self.ui.progressBar.setValue(0)
             self.filesRemoved=False
             self.files={}
-            self.dir=a.selectedFiles()[0]
+            self.dir=unicode(a.selectedFiles()[0])
             self.ui.lineEdit.setText(unicode(self.dir))
             fileslist=os.listdir(unicode(self.dir))
             fileslist.sort()
@@ -302,7 +303,7 @@ class SCWindow(QtGui.QMainWindow):
             self.filesRemoved=False
             self.files={}
             for i in a.selectedFiles(): 
-                self.dir,fname=str(i).rsplit(os.sep,1)
+                self.dir,fname=unicode(i).rsplit(os.sep,1)
                 ext=fname.rsplit(".",1)[1]
                 if ext in self.files:
                     self.files[ext].append(fname)
