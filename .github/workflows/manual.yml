@@ -19,9 +19,9 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    - uses: actions/checkout@v2
-    - name: Checkout repository
-      run: git checkout
+    #- uses: actions/checkout@v2
+    #- name: Checkout repository
+    #  run: git checkout
     - name: List dir
       run: ls -la
       
