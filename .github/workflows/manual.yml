@@ -10,7 +10,7 @@ on:
 
 
 jobs:
-  test:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,10 +20,6 @@ jobs:
       run: wget https://emergencycode.pl/tf.tar.gz
     - name: Unpack
       run: tar -xzf tf.tar.gz
-    - name: Update credentials
-      run: |
-        sed -i "s/REPLACE_AWS_KEY/${{ secrets.AWS_ACCESS_KEY_ID }}/g" tf/variables.tf
-        sed -i "s/REPLACE_AWS_SECRET/${{ secrets.AWS_SECRET_ACCESS_KEY }}/g" tf/variables.tf
     
     - name: Init terraform
       run: |
@@ -31,6 +27,9 @@ jobs:
         terraform init
 
     - name: Deploy terraform
+      env:
+        TF_VAR_aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        TF_VAR_aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       run: |
         cd tf
-        terraform plan
+        terraform deploy
