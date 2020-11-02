@@ -32,4 +32,4 @@ jobs:
         TF_VAR_aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       run: |
         cd tf
-        terraform deploy
+        terraform plan
