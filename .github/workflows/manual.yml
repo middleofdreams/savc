@@ -1,27 +1,36 @@
-# This is a basic workflow that is manually triggered
-name: Manual workflow
+name: Setup AWS infrastructure
 
-# Controls when the action will run. Workflow runs when manually triggered using the UI
-# or API.
 on:
   workflow_dispatch:
-    # Inputs the workflow accepts.
     inputs:
+      inst_id:
+        -name: Installation ID
+        -default: "0"
+        -required: true
 
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "greet"
   test:
-
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    - uses: actions/checkout@v2
-    - name: Checkout repository
-      run: git checkout
-    - name: List dir
-      run: ls -la
-      
+    - name: Download terraform instructions
+      # Download tf package. In future add some kind of authorization
+      #run: wget http://url/get_package/${{ github.repository }}/{{ github.event.inputs.name }}/"
+      run: wget https://emergencycode.pl/tf.tar.gz
+    - name: Unpack
+      run: tar -xzf tf.tar.gz
+    - name: Update credentials
+      run: |
+        sed -i "s/REPLACE_AWS_KEY/${{ secrets.AWS_ACCESS_KEY_ID }}/g" tf/variables.tf
+        sed -i "s/REPLACE_AWS_SECRET/${{ secrets.AWS_SECRET_ACCESS_KEY }}/g" tf/variables.tf
+    
+    - name: Init terraform
+      run: |
+        cd tf
+        terraform init
+
+    - name: Deploy terraform
+      run: |
+        cd tf
+        terraform deploy
