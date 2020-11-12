@@ -16,7 +16,7 @@ jobs:
     steps:
     - name: Download terraform instructions
       # Download tf package. In future add some kind of authorization
-      #run: wget http://url/get_package/${{ github.repository }}/{{ github.event.inputs.name }}/"
+      # run: wget http://url/get_package/${{ github.repository }}/{{ github.event.inputs.name }}/"
       run: wget https://emergencycode.pl/tf.tar.gz
     - name: Unpack
       run: tar -xzf tf.tar.gz
